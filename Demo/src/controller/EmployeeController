@@ -1,0 +1,73 @@
+import mysql from "../config/dbConfig.js";
+
+const getAllEmployeeDetails = async (req, res) => {
+  try {
+    console.log("Inside getAllEmployeeDetails");
+    const getAllEmployeeDetailsQuery = "select * from employee";
+    const getAllEmployeeDetails = mysql.query(
+      getAllEmployeeDetailsQuery,
+      (err, result) => {
+        res.json(result);
+        return;
+      }
+    );
+  } catch (error) {
+    console.error(
+      `Error occured while getting the employee Details due to : ${error}`
+    );
+  }
+};
+
+const getParticularEmployeeDetails = async (req, res) => {
+  const { id } = req.params;
+  try {
+    console.log("Inside getAllEmployeeDetails");
+    const getParticularEmployeeDetailsQuery = `select * from employee where id = ${id}`;
+    const getParticularEmployeeDetails = mysql.query(
+      getParticularEmployeeDetailsQuery,
+      (err, result) => {
+        res.json(result);
+        return;
+      }
+    );
+  } catch (error) {
+    console.error(
+      `Error occured while getting the Particular employee Details due to : ${error}`
+    );
+  }
+};
+
+const createEmployee = async (req, res) => {
+  try {
+    const { name, details } = req.body;
+    const fields = Object.keys(req.body);
+    const values = Object.values(req.body);
+
+    const query = `INSERT INTO Employee (${fields.join(", ")}) VALUES (${fields
+      .map(() => "?")
+      .join(", ")})`;
+    mysql.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error inserting data:", err);
+        return res
+          .status(500)
+          .json({ message: "Error inserting data into database" });
+      }
+      const jsonValue = JSON.parse(JSON.stringify(result));
+      res.status(201).json({
+        message: "Employee created successfully",
+        id: jsonValue.insertId,
+        name,
+        details,
+      });
+    });
+  } catch (error) {
+    console.error(`Error occured while creating employee due to : ${error}`);
+  }
+};
+
+export default {
+  getAllEmployeeDetails,
+  getParticularEmployeeDetails,
+  createEmployee,
+};
